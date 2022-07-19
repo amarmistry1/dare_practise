@@ -1,0 +1,76 @@
+import pandas as pd
+from pandas import read_csv
+from plotly import graph_objects as go
+#from dare_viz import path
+
+ch4_mhd = pd.read_csv(
+    "https://raw.githubusercontent.com/dare-uk/dare-viz/main/data/decc_network/mhd_ch4.csv",
+    index_col = "time",
+)
+ch4_mhd
+
+fig = go.Figure()
+
+alpha = 0.6
+color_mhd = ["rgba(86, 119, 194, 1)", f"rgba(86, 119, 194, {alpha})"]
+color_tac = ["rgba(99, 182, 137, 1)", f"rgba(99, 182, 137, {alpha})"]
+
+date_range = ["2019-05-19", "2019-06-21"]
+date_range = ["2019-03-01", "2019-06-01"]
+
+fig.add_trace(go.Scatter(
+    x=ch4_mhd.loc[date_range[0]:date_range[1]].index,
+    y=ch4_mhd.loc[date_range[0]:date_range[1]].mf.values,
+    mode='lines',
+    line=dict(color=color_mhd[0], width=3.),
+    showlegend=True,
+    name="Mace Head",
+    ))
+
+fig.add_trace(go.Scatter(
+    x=ch4_tac.loc[date_range[0]:date_range[1]].index,
+    y=ch4_tac.loc[date_range[0]:date_range[1]].mf.values,
+    mode='lines',
+    line=dict(color=color_tac[0], width=3.),
+    showlegend=True,
+    name="Tacolneston",
+    ))
+
+fig.update_layout(
+    yaxis_title="Methane (ppm)",
+    template="simple_white",
+    autosize=False,
+    width=550*2,
+    height=400*2,
+    legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="right",
+        x=0.99,
+        traceorder="normal"),
+    margin=dict(l=55, r=10, t=10, b=40),
+    # paper_bgcolor='rgba(0,0,0,0)',
+    # plot_bgcolor='rgba(0,0,0,0)'
+)
+
+
+fig.layout.font.size=40
+fig.layout.font.family="Arial"
+
+#fig.write_image("CH4_data_example.png")
+
+fig.show()
+
+ch4_mhd.plot()
+
+ch4_tac = pd.read_csv(
+    "https://raw.githubusercontent.com/dare-uk/dare-viz/main/data/decc_network/tac_ch4.csv",
+    index_col = "time",
+)
+ch4_tac
+
+ch4_both = pd.merge(ch4_tac, ch4_mhd, on='time')
+ch4_both.rename(columns={'mf_x': 'tac', 'mf_y': 'mhd'}, inplace=True)
+ch4_both
+
+ch4_both.plot()
